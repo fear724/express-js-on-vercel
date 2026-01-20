@@ -56,7 +56,6 @@ app.get('/redis-stream', async (req, res) => {
         const streamName = String(req.query.stream || 'mystream');
         const lastId = String(req.query.lastId || '0-0');
         const results = await redisClient.xRead([{ key: streamName, id: lastId }], { COUNT: 10, BLOCK: 5000 });
-        console.log('Redis stream accessed:', streamName);
         res.json({ stream: streamName, data: results });
     }
     catch (error) {

@@ -60,6 +60,7 @@ app.get('/healthz', (req, res) => {
 
 // Redis stream reader
 app.get('/redis-stream', async (req, res) => {
+  console.log('Accessing Redis stream endpoint -' + process.env.REDIS_URL);
   try {
     const streamName = String(req.query.stream || 'mystream')
     const lastId = String(req.query.lastId || '0-0')
@@ -67,11 +68,11 @@ app.get('/redis-stream', async (req, res) => {
       [{ key: streamName, id: lastId }],
       { COUNT: 10, BLOCK: 5000 }
     )
-    console.log('Redis stream accessed:', streamName)
     res.json({ stream: streamName, data: results })
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
+  console.log('Finished processing Redis stream request');
 })
 
 export default app
