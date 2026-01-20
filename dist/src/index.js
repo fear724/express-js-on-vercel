@@ -9,35 +9,35 @@ const redisClient = createClient({
     url: process.env.REDIS_URL || 'redis://localhost:6379'
 });
 redisClient.connect().catch(console.error);
-// Home route - HTML
+// Home route - API endpoints documentation
 app.get('/', (req, res) => {
-    res.type('html').send(`
-    <!doctype html>
-    <html>
-      <head>
-        <meta charset="utf-8"/>
-        <title>Express on Vercel</title>
-        <link rel="stylesheet" href="/style.css" />
-      </head>
-      <body>
-        <nav>
-          <a href="/">Home</a>
-          <a href="/about">About</a>
-          <a href="/api-data">API Data</a>
-          <a href="/healthz">Health</a>
-          <a href="/redis-stream">Redis Stream</a>
-          <a href="/api/consumer">Consumer</a>
-        </nav>
-        <h1>Welcome to Express on Vercel 🚀</h1>
-        <p>This is a minimal example without a database or forms.</p>
-        <img src="/logo.png" alt="Logo" width="120" />
-      </body>
-    </html>
-  `);
+    res.json([
+        {
+            endpoint: '/redis-stream',
+            method: 'GET',
+            description: 'Reads data from a Redis stream. Accepts query parameters \'stream\' (default: \'mystream\') and \'lastId\' (default: \'0-0\'). Returns JSON with stream name and data.',
+            parameters: {
+                stream: 'string (optional, default: \'mystream\')',
+                lastId: 'string (optional, default: \'0-0\')'
+            }
+        },
+        {
+            endpoint: '/api/consumer',
+            method: 'GET',
+            description: 'Consumes messages from a Redis stream using consumer groups. Processes up to 10 pending messages, acknowledges them, and returns the processed messages.',
+            parameters: {}
+        },
+        {
+            endpoint: '/healthz',
+            method: 'GET',
+            description: 'Health check endpoint that returns the current status and timestamp.',
+            parameters: {}
+        }
+    ]);
 });
-app.get('/about', function (req, res) {
-    res.sendFile(path.join(__dirname, '..', 'components', 'about.htm'));
-});
+// app.get('/about', function (req, res) {
+//   res.sendFile(path.join(__dirname, '..', 'components', 'about.htm'))
+// })
 // Example API endpoint - JSON
 app.get('/api-data', (req, res) => {
     res.json({
