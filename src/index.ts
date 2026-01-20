@@ -1,11 +1,18 @@
 import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { createClient } from 'redis'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app = express()
+
+const redisClient = createClient({
+  url: process.env.REDIS_URL || 'redis://localhost:6379'
+})
+
+redisClient.connect().catch(console.error)
 
 // Home route - HTML
 app.get('/', (req, res) => {
@@ -23,6 +30,8 @@ app.get('/', (req, res) => {
           <a href="/about">About</a>
           <a href="/api-data">API Data</a>
           <a href="/healthz">Health</a>
+          <a href="/redis-stream">Redis Stream</a>
+          <a href="/api/consumer">Consumer</a>
         </nav>
         <h1>Welcome to Express on Vercel 🚀</h1>
         <p>This is a minimal example without a database or forms.</p>
@@ -47,6 +56,21 @@ app.get('/api-data', (req, res) => {
 // Health check
 app.get('/healthz', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
+// Redis stream reader
+app.get('/redis-stream', async (req, res) => {
+  try {
+    const streamName = String(req.query.stream || 'mystream')
+    const lastId = String(req.query.lastId || '0-0')
+    const results = await redisClient.xRead(
+      [{ key: streamName, id: lastId }],
+      { COUNT: 10, BLOCK: 5000 }
+    )
+    res.json({ stream: streamName, data: results })
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
 })
 
 export default app
