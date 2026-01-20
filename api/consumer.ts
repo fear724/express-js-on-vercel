@@ -1,7 +1,11 @@
 import { log } from 'console'
-import { createClient } from 'redis'
+import { RedisClient } from './RedisClient.js'
+import { StreamEventProcessor } from './StreamEventProcessor.js'
+import { MessageProcessor } from './MessageProcessor.js'
+import { StreamConsumer } from './StreamConsumer.js'
+import { ConsumerService } from './ConsumerService.js'
 
-const url = process.env.REDIS_URL
+const url = process.env.REDIS_URL || 'redis://localhost:6379'
 const streamName = process.env.REDIS_STREAM_NAME || 'rest_api_producer_stream'
 const groupName = process.env.REDIS_GROUP_NAME || 'mygroup'
 const consumerName = process.env.REDIS_CONSUMER_NAME || 'vercel-consumer'
@@ -17,59 +21,21 @@ export default async function handler(req, res) {
   console.log('Using Group Name:', groupName) 
   console.log('Using Consumer Name:', consumerName) 
 
-  const client = createClient({
-    url: process.env.REDIS_URL || 'redis://localhost:6379'
-  })
+  // Dependency injection setup
+  const redisClient = new RedisClient(url)
+  const eventProcessor = new StreamEventProcessor()
+  const messageProcessor = new MessageProcessor(eventProcessor)
+  const streamConsumer = new StreamConsumer(redisClient, messageProcessor, streamName, groupName, consumerName)
+  const consumerService = new ConsumerService(redisClient, streamConsumer)
 
   try {
-    await client.connect()
-
-    // Create consumer group if it doesn't exist
-    try {
-      log('Creating consumer group if not exists...')
-      await client.xGroupCreate(streamName, groupName, '0', { MKSTREAM: true })
-    } catch (error) {
-      if (!error.message.includes('BUSYGROUP')) {
-        throw error
-      }
-    }
-
-    // Read and process up to 10 pending messages
-    log('Reading pending messages...')
-    const pendingResult = await client.xReadGroup(
-      groupName,
-      consumerName,
-      [{ key: streamName, id: '>' }],
-      { COUNT: 10, BLOCK: 1000 }
-    )
-
-    const processedMessages = []
-
     log('Processing messages...')
-    if (pendingResult && Array.isArray(pendingResult) && pendingResult.length > 0) {
-      for (const stream of pendingResult) {
-        if (stream && typeof stream === 'object' && 'messages' in stream && Array.isArray(stream.messages) && stream.messages.length > 0) {
-          for (const message of stream.messages) {
-            // Process the message
-            await processMessage(message.message)
+    const result = await consumerService.processMessages()
 
-            // Acknowledge the message
-            await client.xAck(streamName, groupName, message.id)
-
-            processedMessages.push({
-              id: message.id,
-              data: message.message
-            })
-          }
-        }
-      }
-    }
-
-    log
     res.status(200).json({
       success: true,
-      processed: processedMessages.length,
-      messages: processedMessages
+      processed: result.processed,
+      messages: result.messages
     })
 
   } catch (error) {
@@ -78,12 +44,6 @@ export default async function handler(req, res) {
       error: 'Failed to process messages',
       details: error.message
     })
-  } finally {
-    await client.quit()
   }
 }
 
-async function processMessage(message) {
-  console.log('Processing message:', message)
-  // Add your message processing logic here
-}
