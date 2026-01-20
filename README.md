@@ -29,6 +29,8 @@ Install the dependencies:
 
 ```bash
 pnpm install
+
+pnpm build
 ```
 
 Install the Vercel CLI:

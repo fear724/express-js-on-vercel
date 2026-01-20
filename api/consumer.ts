@@ -2,7 +2,7 @@ import { log } from 'console'
 import { createClient } from 'redis'
 
 const url = process.env.REDIS_URL
-const streamName = process.env.REDIS_STREAM_NAME || 'mystream'
+const streamName = process.env.REDIS_STREAM_NAME || 'rest_api_producer_stream'
 const groupName = process.env.REDIS_GROUP_NAME || 'mygroup'
 const consumerName = process.env.REDIS_CONSUMER_NAME || 'vercel-consumer'
 
