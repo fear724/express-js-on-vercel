@@ -6,6 +6,7 @@ export default async function handler(req, res) {
     if (req.method !== 'GET') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
+    console.log('Consumer endpoint hit');
     const client = createClient({
         url: process.env.REDIS_URL || 'redis://localhost:6379'
     });

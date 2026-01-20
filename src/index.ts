@@ -67,6 +67,7 @@ app.get('/redis-stream', async (req, res) => {
       [{ key: streamName, id: lastId }],
       { COUNT: 10, BLOCK: 5000 }
     )
+    console.log('Redis stream accessed:', streamName)
     res.json({ stream: streamName, data: results })
   } catch (error) {
     res.status(500).json({ error: error.message })
