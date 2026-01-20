@@ -73,17 +73,5 @@ export default async function handler(req, res) {
 
 async function processMessage(message) {
   console.log('Processing message:', message)
-
   // Add your message processing logic here
-  if (message.type === 'user_action') {
-    console.log('Processing user action:', message.data)
-    // Example: send email, update database, etc.
-  } else if (message.type === 'system_event') {
-    console.log('Processing system event:', message.data)
-  } else {
-    console.log('Unknown message type:', message)
-  }
-
-  // Simulate processing time
-  await new Promise(resolve => setTimeout(resolve, 100))
 }
