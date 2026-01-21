@@ -1,4 +1,4 @@
-// Stream consumer
+// Stream consumer implementation
 export class StreamConsumer {
     redisClient;
     messageProcessor;

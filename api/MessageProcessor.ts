@@ -1,7 +1,7 @@
 import { IMessageProcessor, StreamEvent } from './types.js'
 import { StreamEventProcessor } from './StreamEventProcessor.js'
 
-// Message processor
+// Message processor implementation
 export class MessageProcessor implements IMessageProcessor {
   private eventProcessor: StreamEventProcessor
 

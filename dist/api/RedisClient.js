@@ -28,4 +28,8 @@ export class RedisClient {
     async acknowledgeMessage(streamName, groupName, messageId) {
         await this.client.xAck(streamName, groupName, messageId);
     }
+    // Added method to support xadd command
+    async xadd(streamName, id, fields) {
+        return this.client.xAdd(streamName, id, fields);
+    }
 }

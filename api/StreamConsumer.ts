@@ -1,6 +1,6 @@
 import { IStreamConsumer, IRedisClient, IMessageProcessor } from './types.js'
 
-// Stream consumer
+// Stream consumer implementation
 export class StreamConsumer implements IStreamConsumer {
   private redisClient: IRedisClient
   private messageProcessor: IMessageProcessor

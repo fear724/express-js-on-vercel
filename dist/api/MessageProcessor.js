@@ -1,4 +1,4 @@
-// Message processor
+// Message processor implementation
 export class MessageProcessor {
     eventProcessor;
     constructor(eventProcessor) {

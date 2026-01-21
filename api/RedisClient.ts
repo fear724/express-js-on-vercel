@@ -40,4 +40,10 @@ export class RedisClient implements IRedisClient {
   async acknowledgeMessage(streamName: string, groupName: string, messageId: string): Promise<void> {
     await this.client.xAck(streamName, groupName, messageId)
   }
+
+  // Added method to support xadd command
+  async xadd(streamName: string, id: string, fields: Record<string, string>): Promise<string> {
+    return this.client.xAdd(streamName, id, fields)
+  }
+
 }

@@ -6,6 +6,7 @@ import { StreamConsumer } from './StreamConsumer.js';
 import { ConsumerService } from './ConsumerService.js';
 const url = process.env.REDIS_URL || 'redis://localhost:6379';
 const streamName = process.env.REDIS_STREAM_NAME || 'rest_api_producer_stream';
+const targetStream = process.env.REDIS_TARGET_STREAM || 'grpc_api_producer_stream';
 const groupName = process.env.REDIS_GROUP_NAME || 'mygroup';
 const consumerName = process.env.REDIS_CONSUMER_NAME || 'vercel-consumer';
 export default async function handler(req, res) {
@@ -19,7 +20,7 @@ export default async function handler(req, res) {
     console.log('Using Consumer Name:', consumerName);
     // Dependency injection setup
     const redisClient = new RedisClient(url);
-    const eventProcessor = new StreamEventProcessor();
+    const eventProcessor = new StreamEventProcessor(redisClient, targetStream);
     const messageProcessor = new MessageProcessor(eventProcessor);
     const streamConsumer = new StreamConsumer(redisClient, messageProcessor, streamName, groupName, consumerName);
     const consumerService = new ConsumerService(redisClient, streamConsumer);
